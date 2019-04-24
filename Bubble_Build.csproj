@@ -42,6 +42,30 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\TrickyUnits\Dirry.cs">
+      <Link>Include\Units\Dirry.cs</Link>
+    </Compile>
+    <Compile Include="..\..\TrickyUnits\FileList.cs">
+      <Link>Include\Units\FileList.cs</Link>
+    </Compile>
+    <Compile Include="..\..\TrickyUnits\FlagParse.cs">
+      <Link>Include\Units\FlagParse.cs</Link>
+    </Compile>
+    <Compile Include="..\..\TrickyUnits\GINI Is Not Ini.cs">
+      <Link>Include\Units\GINI Is Not Ini.cs</Link>
+    </Compile>
+    <Compile Include="..\..\TrickyUnits\mkl.cs">
+      <Link>Include\Units\mkl.cs</Link>
+    </Compile>
+    <Compile Include="..\..\TrickyUnits\qstr.cs">
+      <Link>Include\Units\qstr.cs</Link>
+    </Compile>
+    <Compile Include="..\..\TrickyUnits\qstream.cs">
+      <Link>Include\Units\qstream.cs</Link>
+    </Compile>
+    <Compile Include="..\..\TrickyUnits\QuickConsoleColors.cs">
+      <Link>Include\Units\QuickConsoleColors.cs</Link>
+    </Compile>
     <Compile Include="Bubble_Build.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
