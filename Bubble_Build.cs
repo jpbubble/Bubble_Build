@@ -24,6 +24,7 @@
 // Version: 19.04.24
 // EndLic
 
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,6 +39,8 @@ namespace Bubble {
         static FlagParse Flags;
 
         static void GetAllVersions() {
+            MKL.Version("Bubble Builder Tool - Bubble_Build.cs","19.04.24");
+            MKL.Lic    ("Bubble Builder Tool - Bubble_Build.cs","GNU General Public License 3");
             Dirry.InitAltDrives(); // Must be done anyway, and we'll get the version in the process!
             GINI.Hello();
             FileList.Hello();
@@ -61,4 +64,5 @@ namespace Bubble {
         }
     }
 }
+
 
