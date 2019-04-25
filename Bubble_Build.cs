@@ -26,6 +26,7 @@
 
 
 
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -48,7 +49,7 @@ namespace Bubble {
 
 
         #region Input directory data
-        static string[] InputDirectories {
+        static public string[] InputDirectories {
             get {
                 switch (Project.C("INFTYPE")) {
                     case "SINGLE":
@@ -71,6 +72,7 @@ namespace Bubble {
             qstr.Hello();
             QuickStream.Hello();
             QCol.Hello();
+            Gather.Hello();
         }
 
         static void Head() {            
@@ -116,6 +118,7 @@ namespace Bubble {
                 GINIFiles[Config] = gconfig;
                 Config.AlwaysTrim = true;
                 Ask(Config, "BubbleTemp", "I need a folder reserved for temporary files!\nI advice NOT to use SSD drivers or USB sticks for that!\n\nPlease enter a path for the temp folder: ");
+                AskList(Config, "LibraryPath", "I need a list of folders where Bubble Builder can find the Lua/StrongLua libraries. This is a global list counting for all projects.");
             } catch (Exception e) {
                 Crash(e);
             }
@@ -141,6 +144,25 @@ namespace Bubble {
                 Ask(tag, question, alwayscap);
             }
         }
+
+        static void AskList(TGINI p,string tag, string question) {
+            p.CL(tag,true);
+            var L = p.List(tag);
+            while (L.Count == 0) {
+                QCol.Yellow($"{question}\n");
+                QCol.Red("Please enter your answers. Hitting enter without furhter input ends the sequence\n");
+                string line;
+                do {
+                    QCol.Magenta("> ");
+                    QCol.Cyan("");
+                    line = Console.ReadLine().Trim();
+                    if (line != "") p.Add(tag,line);
+                } while (line != "");
+                p.SaveSource(GINIFiles[p]);
+            }
+        }
+        static void AskList(string tag, string question) => AskList(Project, tag, question);
+
         #region Build Project
         static void MultiScan() {
 
@@ -168,6 +190,8 @@ namespace Bubble {
                     }
                 } while (!yes);
                 QuickStream.SaveString(prjfile,"[rem]\nI fart in your general direction\nYour mother was a hamster and your father smelt of elderberries.\nNow go away, or I shall taunt you a second time!\n");                
+            } else {
+                QCol.Doing("Reading", prjfile);
             }
             Project = GINI.ReadFromFile(prjfile);
             GINIFiles[Project] = prjfile;
@@ -190,7 +214,8 @@ namespace Bubble {
                 var h = $"Dir:{dir}";
                 Ask(h, $"Author[{dir}]", "Author:");
                 Ask(h, $"Notes[{dir}]", "Notes:");
-            }            
+            }
+            Gather.Start();
         }
         #endregion
 
@@ -213,6 +238,7 @@ namespace Bubble {
         #endregion
     }
 }
+
 
 
 
