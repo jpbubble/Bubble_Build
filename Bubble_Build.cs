@@ -129,7 +129,8 @@ namespace Bubble {
                 p.D(tag,Console.ReadLine());
                 p.SaveSource(GINIFiles[p]);
             }
-            p.D(tag, p.C(tag).ToUpper());
+            if (alwayscaps)
+                p.D(tag, p.C(tag).ToUpper());
         }
 
         static void Ask(string tag, string question, bool alwayscaps=false) => Ask(Project, tag, question,alwayscaps);
@@ -174,6 +175,7 @@ namespace Bubble {
             Ask("Author", "Author name: ");
             Ask("ProjectLicense", "Project license: ");
             Ask("OutFolder", "Output Folder: ");
+            Ask("ExeName", "Executable name: ");
             Ask("Website", "Website:");
             if (Project.C("BUBBLEID") == "") {
                 Project.D("BUBBLEID", qstr.md5($"BUBBLES.{DateTime.Now.ToString()}.{DateTime.Today}.{prjfile}.{Project.C("Author")}.{Project.C("Title")}.BUBBLES"));
@@ -188,7 +190,7 @@ namespace Bubble {
                 var h = $"Dir:{dir}";
                 Ask(h, $"Author[{dir}]", "Author:");
                 Ask(h, $"Notes[{dir}]", "Notes:");
-            }
+            }            
         }
         #endregion
 
