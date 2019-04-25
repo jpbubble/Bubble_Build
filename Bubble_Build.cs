@@ -32,15 +32,34 @@ using System.Text;
 using System.Threading.Tasks;
 using TrickyUnits;
 
+
 namespace Bubble {
     class Bubble_Build {
 
+        #region variables
         static Dictionary<TGINI, string> GINIFiles = new Dictionary<TGINI, string>();
-        public static TGINI Project=null;
+        public static TGINI Project = null;
         public static TGINI Config = null;
         static FlagParse Flags;
         static public bool BuildTest => Flags.GetBool("test");
         static public string[] WantProjects => Flags.Args;
+        #endregion
+
+
+        #region Input directory data
+        string[] InputDirectories {
+            get {
+                switch (Project.C("INFTYPE")) {
+                    case "SINGLE":
+                        return new string[] { Project.C("INPUTDIR") };
+                    case "MULTI":
+                        return Project.List("INPUTDIRS").ToArray();
+                    default:
+                        throw new Exception($"Unknown INFTYPE {Project.C("INFTYPE")}");
+                }
+            }
+        } 
+        #endregion
 
         static void GetAllVersions() {
             MKL.Version("Bubble Builder Tool - Bubble_Build.cs","19.04.24");
@@ -101,7 +120,7 @@ namespace Bubble {
             }
         }
 
-        static void Ask(TGINI p,string tag, string question) {
+        static void Ask(TGINI p,string tag, string question, bool alwayscaps=false) {
             while (p.C(tag) == "") {
                 QCol.Yellow(question);
                 for (int i = question.Length; i < QCol.DoingTab; i++) Console.Write(" ");
@@ -109,9 +128,10 @@ namespace Bubble {
                 p.D(tag,Console.ReadLine());
                 p.SaveSource(GINIFiles[p]);
             }
+            p.D(tag, p.C(tag).ToUpper());
         }
 
-        static void Ask(string tag, string question) => Ask(Project, tag, question);
+        static void Ask(string tag, string question, bool alwayscaps=false) => Ask(Project, tag, question);
 
         #region Build Project
         static void BuildProject(string prj) {
@@ -148,6 +168,8 @@ namespace Bubble {
                 Project.D("BUBBLEID", qstr.md5($"BUBBLES.{DateTime.Now.ToString()}.{DateTime.Today}.{prjfile}.{Project.C("Author")}.{Project.C("Title")}.BUBBLES"));
                 Project.SaveSource(GINIFiles[Project]);
             }
+            do { Ask("INFTYPE", "Input folder type (SINGLE/MULTI):",true);  } while (Project.C("INFTYPE") != "SINGLE" && Project.C("INFTYPE")!="MULTI");
+
         }
         #endregion
 
