@@ -35,6 +35,7 @@ using TrickyUnits;
 namespace Bubble {
     class Bubble_Build {
 
+        static Dictionary<TGINI, string> GINIFiles = new Dictionary<TGINI, string>();
         public static TGINI Project=null;
         public static TGINI Config = null;
         static FlagParse Flags;
@@ -83,18 +84,90 @@ namespace Bubble {
             }
         }
 
-        static void BuildProject(string prj) {
-            if (Project!=null) { Crash("Build Project request, while a build is already running!", "This must be an internal error! Either caused bya bug, or somebody has been messing with the source code!\nEither way, this error is fatal!"); }
+
+        static void LoadGlobalConfig() {
+            try {
+                var gconfig = Dirry.C("$AppSupport$/Bubble_GlobalConfig.GINI");
+                if (!File.Exists(gconfig)) {
+                    Directory.CreateDirectory(qstr.ExtractDir(gconfig));
+                    QuickStream.SaveString(gconfig, "[rem]\nIt ain't what you do, it's the way that you do it!");
+                }
+                Config = GINI.ReadFromFile(gconfig);
+                GINIFiles[Config] = gconfig;
+                Config.AlwaysTrim = true;
+                Ask(Config, "BubbleTemp", "I need a folder reserved for temporary files!\nI advice NOT to use SSD drivers or USB sticks for that!\n\nPlease enter a path for the temp folder: ");
+            } catch (Exception e) {
+                Crash(e);
+            }
         }
 
-        static void Main(string[] args) {
-            Flags = new FlagParse(args);
-            GetAllVersions();
-            Head();
-            ParseCLI();
-            QCol.OriCol();
-            foreach (string prj in WantProjects) BuildProject(prj);
+        static void Ask(TGINI p,string tag, string question) {
+            while (p.C(tag) == "") {
+                QCol.Yellow(question);
+                for (int i = question.Length; i < QCol.DoingTab; i++) Console.Write(" ");
+                QCol.Cyan("");
+                p.D(tag,Console.ReadLine());
+                p.SaveSource(GINIFiles[p]);
+            }
         }
+
+        static void Ask(string tag, string question) => Ask(Project, tag, question);
+
+        #region Build Project
+        static void BuildProject(string prj) {
+            var prjfile = Dirry.AD(prj); if (qstr.ExtractExt(prjfile) == "") prjfile += ".BubbleProject";
+            if (Project != null) { Crash("Build Project request, while a build is already running!", "This must be an internal error! Either caused bya bug, or somebody has been messing with the source code!\nEither way, this error is fatal!"); }
+            if (!File.Exists(prjfile)) {
+                QCol.Red($"Project \"{prjfile}\" does not yet exist!\n\n");
+                QCol.Yellow("Do you want to create it? ");
+                QCol.Cyan("");
+                var yes = false;
+                do {
+                    var b = Console.ReadKey();
+                    switch (b.Key) {
+                        case ConsoleKey.Y:
+                            QCol.Cyan("es\n\n");
+                            QCol.Doing("Creating", prjfile);
+                            yes = true;
+                            break;
+                        case ConsoleKey.N:
+                            QCol.Cyan("o\n");
+                            return;
+                    }
+                } while (!yes);
+                QuickStream.SaveString(prjfile,"[rem]\nI fart in your general direction\nYour mother was a hamster and your father smelt of elderberries.\nNow go away, or I shall taunt you a second time!\n");                
+            }
+            Project = GINI.ReadFromFile(prjfile);
+            GINIFiles[Project] = prjfile;
+            Ask("Title", "Title of your project: ");
+            Ask("Author", "Author name: ");
+            Ask("ProjectLicense", "Project license: ");
+            Ask("OutFolder", "Output Folder: ");
+            Ask("Website", "Website:");
+            if (Project.C("BUBBLEID") == "") {
+                Project.D("BUBBLEID", qstr.md5($"BUBBLES.{DateTime.Now.ToString()}.{DateTime.Today}.{prjfile}.{Project.C("Author")}.{Project.C("Title")}.BUBBLES"));
+                Project.SaveSource(GINIFiles[Project]);
+            }
+        }
+        #endregion
+
+
+        #region Main
+        static void Main(string[] args) {
+            try {
+                QCol.DoingTab = 25;
+                Flags = new FlagParse(args);
+                GetAllVersions();
+                Head();
+                ParseCLI();
+                QCol.OriCol();
+                LoadGlobalConfig();
+                foreach (string prj in WantProjects) BuildProject(prj);
+            } catch (Exception e) {
+                Crash(e);
+            }
+        }
+        #endregion
     }
 }
 
