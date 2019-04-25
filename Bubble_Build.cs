@@ -48,7 +48,7 @@ namespace Bubble {
 
 
         #region Input directory data
-        string[] InputDirectories {
+        static string[] InputDirectories {
             get {
                 switch (Project.C("INFTYPE")) {
                     case "SINGLE":
@@ -132,9 +132,19 @@ namespace Bubble {
             p.D(tag, p.C(tag).ToUpper());
         }
 
-        static void Ask(string tag, string question, bool alwayscaps=false) => Ask(Project, tag, question);
+        static void Ask(string tag, string question, bool alwayscaps=false) => Ask(Project, tag, question,alwayscaps);
 
+        static void Ask(string caption, string tag, string question, bool alwayscap = false) {
+            if (Project.C(tag) == "") {
+                QCol.Magenta($"{caption}\t\t");
+                Ask(tag, question, alwayscap);
+            }
+        }
         #region Build Project
+        static void MultiScan() {
+
+        }
+        
         static void BuildProject(string prj) {
             var prjfile = Dirry.AD(prj); if (qstr.ExtractExt(prjfile) == "") prjfile += ".BubbleProject";
             if (Project != null) { Crash("Build Project request, while a build is already running!", "This must be an internal error! Either caused bya bug, or somebody has been messing with the source code!\nEither way, this error is fatal!"); }
@@ -170,7 +180,15 @@ namespace Bubble {
                 Project.SaveSource(GINIFiles[Project]);
             }
             do { Ask("INFTYPE", "Input folder type (SINGLE/MULTI):",true);  } while (Project.C("INFTYPE") != "SINGLE" && Project.C("INFTYPE")!="MULTI");
-
+            if (Project.C("INFTYPE") == "MULTI")
+                MultiScan();
+            else
+                Ask("INPUTDIR", "Input directory: ");
+            foreach(string dir in InputDirectories) {
+                var h = $"Dir:{dir}";
+                Ask(h, $"Author[{dir}]", "Author:");
+                Ask(h, $"Notes[{dir}]", "Notes:");
+            }
         }
         #endregion
 
