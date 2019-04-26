@@ -34,6 +34,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using TrickyUnits;
+using UseJCR6;
 
 
 namespace Bubble {
@@ -74,6 +75,9 @@ namespace Bubble {
             QuickStream.Hello();
             QCol.Hello();
             Gather.Hello();
+            JCR6_lzma.Init();
+            JCR6_zlib.Init();
+            JCR6_jxsrcca.Init();
         }
 
         static void Head() {            
@@ -164,6 +168,27 @@ namespace Bubble {
         }
         static void AskList(string tag, string question) => AskList(Project, tag, question);
 
+        static void Yes(TGINI p, string tag, string question) {
+            while (p.C(tag) == "") {
+                QCol.Yellow(question);
+                QCol.Cyan(" ? ");
+                QCol.Magenta("<Y/N> ");
+                switch (Console.ReadKey(true).Key) {
+                    case ConsoleKey.Y:
+                        QCol.Green("Yes\n");
+                        p.D(tag, "YES");
+                        p.SaveSource(GINIFiles[p]);
+                        break;
+                    case ConsoleKey.N:
+                        QCol.Red("No\n");
+                        p.D(tag, "NO");
+                        p.SaveSource(GINIFiles[p]);
+                        break;
+                }
+            }
+        }
+        static void Yes(string tag, string question) => Yes(Project, tag, question);
+
         #region Build Project
         static void MultiScan() {
 
@@ -217,6 +242,19 @@ namespace Bubble {
                 Ask(h, $"Notes[{dir}]", "Notes:");
             }
             Gather.Start();
+            if (Project.C("JCRCOMPRESS") == "") {
+                QCol.Doing("Supported compression drivers", "");
+                foreach (string k in JCR6.CompDrivers.Keys) {
+                    QCol.Green("= ");
+                    QCol.White($"{k}\n");
+                }
+                do {
+                    Project.D("JCRCOMPRESS", "");
+                    Ask("JCRCOMPRESS", "Which compression method should be used? ");
+                } while (!JCR6.CompDrivers.ContainsKey(Project.C("JCRCOMPRESS")));
+            }
+            Yes("JCRMERGE", "Should Bubble Builder find any files JCR6 recognizes as a packed resource. Should I merge them");
+            Console.WriteLine("\n");
         }
         #endregion
 
