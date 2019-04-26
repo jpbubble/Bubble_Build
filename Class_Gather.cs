@@ -90,8 +90,12 @@ namespace Bubble {
         }
 
         static void GatherDir(string dir, List<string> FUtL) {
-            QCol.Doing("Gathering", dir);
+            QCol.Doing("Gathering", dir);            
             var tree = FileList.GetTree(dir);
+            if (tree==null) {
+                QCol.QuickError($"I could not get the tree from directory {dir}");
+                return;
+            }
             foreach(string f in tree) {
                 var cf = f.ToUpper();
                 if (qstr.ExtractDir(cf) == "LIBS")
