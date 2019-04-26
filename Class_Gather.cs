@@ -44,14 +44,14 @@ namespace Bubble {
         static List<string> Future;
         static SortedDictionary<string, string> RequestedLibraries = new SortedDictionary<string, string>();
 
-        static void Queue(string t,string f,string todir="") {
+        static void Queue(string t,string f,string fromdir, string todir="") {
             var todir2 = todir;
             if (todir != "" && (!qstr.Suffixed(todir2, "/"))) todir += "/";
-            Gathered[$"{todir2}{f}"] = f;
+            Gathered[$"{todir2}{qstr.RemPrefix(f,fromdir+"/")}"] = f;
             QCol.Doing($"Queued {t}", f);
         }
 
-        static void AnalyseScript(string script) {
+        static void AnalyseScript(string script,List<string> FutLib,string fromdir, string todir) {
             QCol.Doing("Analysing", script);
             try {
                 var usepref = "";
@@ -66,31 +66,34 @@ namespace Bubble {
                     var tl = ln[lnum].Trim();
                     if (qstr.Prefixed(tl, usepref)) {
                         var libname = tl.Substring(usepref.Length);
-                        if (libname == "") throw new Exception($"Invalid #USE call in line #{lnum}");
+                        if (libname == "") throw new Exception($"Invalid #USE call in line #{lnum+1}");
                         if (qstr.Prefixed(libname.ToUpper(),"LIBS/")) {
                             var reqlib = libname.Substring(5).ToLower();
                             if (!RequestedLibraries.ContainsKey(reqlib)) {
                                 var foundas = "";
                                 foreach (string s in Bubble_Build.Config.List("LibraryPath")) {
-                                    var check = $"{s}/{reqlib}.blb";
+                                    var check = Dirry.AD($"{s}/{reqlib}.blb");
+                                    //Console.WriteLine($"Checking: {check}");
                                     if (Directory.Exists(check)) {
                                         foundas = check;
                                         break;
                                     }
                                 }
+                                if (foundas == "") throw new Exception($"Requested Library ({reqlib}) has not been found in line {lnum+1}");
                                 RequestedLibraries[reqlib] = foundas;
-                                QCol.Doing("- Requested library ", foundas);
+                                FutLib.Add(foundas);
+                                QCol.Doing("- Requested library", foundas);
                             }
                         }
                     }
                 }
-                Queue("script",script);
+                Queue("script", script, fromdir, todir);
             } catch (Exception E) {
                 QCol.QuickError($"I couldn't read the script -- {E.Message}");
             }
         }
 
-        static void GatherDir(string dir, List<string> FUtL) {
+        static void GatherDir(string dir, List<string> FUtL,string todir) {            
             QCol.Doing("Gathering", dir);            
             var tree = FileList.GetTree(dir);
             if (tree==null) {
@@ -111,20 +114,20 @@ namespace Bubble {
                         case "PNG":
                         case "JPG":
                         case "BMP":
-                            Queue("Image",fp);
+                            Queue("Image",fp,dir,todir);
                             break;
                         case "OGG":
                         case "MP3":
-                            Queue("Audio", fp);
+                            Queue("Audio", fp,dir,todir);
                             break;
                         case "GINI":
-                            Queue("GINI", fp);
+                            Queue("GINI", fp,dir,todir);
                             break;
                         case "LUA":
-                            AnalyseScript(fp);
+                            AnalyseScript(fp,FUtL,dir,todir);
                             break;
                         default:
-                            Queue("file", fp);
+                            Queue("file", fp,dir,todir);
                             break;
                     }
                 }
@@ -136,11 +139,13 @@ namespace Bubble {
             RequestedLibraries.Clear();
             
             Future = new List<string>(Bubble_Build.InputDirectories);
+            var todir = "";
             while(Future.Count>0) {
                 Working = Future;
                 Future = new List<string>();
                 foreach (string d in Working)
-                    GatherDir(Dirry.AD(d), Future);
+                    GatherDir(Dirry.AD(d), Future,todir);
+                todir = "Libs/";
             }
         }
 
