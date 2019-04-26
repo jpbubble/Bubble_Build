@@ -28,6 +28,8 @@
 
 
 
+
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -41,6 +43,13 @@ namespace Bubble {
     class Bubble_Build {
 
         #region variables
+#if DEBUG
+        static public string EnginesJCRFile => $"{qstr.ExtractDir(MKL.MyExe)}/../Release/Engines.jcr";
+#else
+        public static string EnginesJCRFile => $"{qstr.ExtractDir(MKL.MyExe)}/Engines.jcr";
+#endif
+        static TJCRDIR EnginesJCR;
+
         static Dictionary<TGINI, string> GINIFiles = new Dictionary<TGINI, string>();
         public static TGINI Project = null;
         public static TGINI Config = null;
@@ -75,6 +84,7 @@ namespace Bubble {
             QuickStream.Hello();
             QCol.Hello();
             Gather.Hello();
+            Pack.Hello();
             JCR6_lzma.Init();
             JCR6_zlib.Init();
             JCR6_jxsrcca.Init();
@@ -99,7 +109,13 @@ namespace Bubble {
 
         static void ParseCLI() {
             Flags.CrBool("test", false);
+            Flags.CrBool("version", false);
             if (!Flags.Parse()) Crash("Command line parse error");
+            if (Flags.GetBool("version")) {
+                QCol.Magenta($"{MKL.All()}\n\n");
+                QCol.OriCol();
+                Environment.Exit(0);
+            }
             if (WantProjects.Length == 0) {
                 QCol.Red("Usage: ");
                 QCol.Yellow("Bubble_Build ");
@@ -255,8 +271,16 @@ namespace Bubble {
             }
             Yes("JCRMERGE", "Should Bubble Builder find any files JCR6 recognizes as a packed resource. Should I merge them");
             Console.WriteLine("\n");
+            Pack.Go();
         }
         #endregion
+
+        static void InitEngines() {
+            EnginesJCR = JCR6.Dir(EnginesJCRFile);
+            if (EnginesJCR == null) {
+                Crash(JCR6.JERROR);
+            }
+        }
 
 
         #region Main
@@ -266,6 +290,7 @@ namespace Bubble {
                 Flags = new FlagParse(args);
                 GetAllVersions();
                 Head();
+                InitEngines();
                 ParseCLI();
                 QCol.OriCol();
                 LoadGlobalConfig();
@@ -277,6 +302,8 @@ namespace Bubble {
         #endregion
     }
 }
+
+
 
 
 

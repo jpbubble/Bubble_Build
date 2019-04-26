@@ -25,6 +25,7 @@
 // EndLic
 
 
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,7 +40,7 @@ namespace Bubble {
             MKL.Version("Bubble Builder Tool - Class_Gather.cs","19.04.26");
         }
 
-        static SortedDictionary<string, string> Gathered = new SortedDictionary<string, string>();
+        static public SortedDictionary<string, string> Gathered = new SortedDictionary<string, string>();
         static List<string> Working;
         static List<string> Future;
         static SortedDictionary<string, string> RequestedLibraries = new SortedDictionary<string, string>();
@@ -153,5 +154,6 @@ namespace Bubble {
 
     }
 }
+
 
 
