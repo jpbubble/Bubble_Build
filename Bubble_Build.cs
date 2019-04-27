@@ -48,7 +48,7 @@ namespace Bubble {
 #else
         public static string EnginesJCRFile => $"{qstr.ExtractDir(MKL.MyExe)}/Engines.jcr";
 #endif
-        static TJCRDIR EnginesJCR;
+        static public TJCRDIR EnginesJCR { get; private set; } = null;
 
         static Dictionary<TGINI, string> GINIFiles = new Dictionary<TGINI, string>();
         public static TGINI Project = null;
@@ -85,6 +85,7 @@ namespace Bubble {
             QCol.Hello();
             Gather.Hello();
             Pack.Hello();
+            EngineExtract.Hello();
             JCR6_lzma.Init();
             JCR6_zlib.Init();
             JCR6_jxsrcca.Init();
@@ -102,6 +103,7 @@ namespace Bubble {
             QCol.Red("ERROR! ");
             QCol.Yellow($"{Error}\n");
             if (additional != "") QCol.Cyan($"\n\n{additional}\n");
+            if (System.Diagnostics.Debugger.IsAttached) Console.ReadLine();
             Environment.Exit(ExitCode);
         }
 
@@ -123,6 +125,7 @@ namespace Bubble {
                 QCol.Green("<Project>\n\n\n");
                 QCol.White("Please note, that Build_Bubble is able to generate its project files and will ask and store anything it doesn't know\n");
                 QCol.White("With the -test parameter a test version will be created which will be build very quickly, however, it will only be usable on the same computer it has been created on!");
+                if (System.Diagnostics.Debugger.IsAttached) Console.ReadLine();
                 Environment.Exit(0);
             }
         }
@@ -243,6 +246,14 @@ namespace Bubble {
             Ask("OutFolder", "Output Folder: ");
             Ask("ExeName", "Executable name: ");
             Ask("Website", "Website:");
+            while (!Engine.ContainsKey(Project.C("Engine"))) {
+                Project.D("Engine", "");
+                QCol.Magenta("\n\nWhich BUBBLE engine do you wanna use?\n");
+                foreach (string name in Engine.Keys) {
+                    QCol.Doing("Supported", name);
+                }
+                Ask("Engine", "Engine");
+            }
             if (Project.C("BUBBLEID") == "") {
                 Project.D("BUBBLEID", qstr.md5($"BUBBLES.{DateTime.Now.ToString()}.{DateTime.Today}.{prjfile}.{Project.C("Author")}.{Project.C("Title")}.BUBBLES"));
                 Project.SaveSource(GINIFiles[Project]);
@@ -272,15 +283,40 @@ namespace Bubble {
             Yes("JCRMERGE", "Should Bubble Builder find any files JCR6 recognizes as a packed resource. Should I merge them");
             Console.WriteLine("\n");
             Pack.Go();
+            EngineExtract.Go();
         }
         #endregion
+
+        #region Engines
+        public class TEngine { // As I want this to be pointer based for easier access, I chose a class over a struct!
+            public TGINI Config;
+            public List<string> files = new List<string>();
+            public SortedDictionary<string, string> Replacements = new SortedDictionary<string, string>();
+        }
+        static public SortedDictionary<string, TEngine> Engine = new SortedDictionary<string, TEngine>();
 
         static void InitEngines() {
             EnginesJCR = JCR6.Dir(EnginesJCRFile);
             if (EnginesJCR == null) {
                 Crash(JCR6.JERROR);
             }
+            foreach(string file in EnginesJCR.Entries.Keys) {
+                var caps = file.Split('/');
+                var name = EnginesJCR.Entries[file].Entry;
+                if (caps.Length>2 && caps[0]=="ENGINE_BIN") {
+                    var the_engine = caps[1];
+                    if (!Engine.ContainsKey(the_engine))
+                        Engine[the_engine] = new TEngine();
+                    var Eng = Engine[the_engine];
+                    if (Eng.Config == null)
+                        Eng.Config = GINI.ReadFromLines(EnginesJCR.ReadLines($"{caps[0]}/{caps[1]}/BuildData.GINI"));
+                    if (caps[2] != "BUILDDATA.GINI")
+                        Eng.files.Add(name);
+                }
+            }            
         }
+        #endregion
+
 
 
         #region Main
@@ -293,11 +329,12 @@ namespace Bubble {
                 InitEngines();
                 ParseCLI();
                 QCol.OriCol();
-                LoadGlobalConfig();
+                LoadGlobalConfig();                
                 foreach (string prj in WantProjects) BuildProject(prj);
             } catch (Exception e) {
                 Crash(e);
             }
+            if (System.Diagnostics.Debugger.IsAttached) Console.ReadLine();
         }
         #endregion
     }

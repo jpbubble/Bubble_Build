@@ -184,6 +184,7 @@
       <Link>Include\Units\QuickConsoleColors.cs</Link>
     </Compile>
     <Compile Include="Bubble_Build.cs" />
+    <Compile Include="Class_EngineExtract.cs" />
     <Compile Include="Class_Gather.cs" />
     <Compile Include="Class_Pack.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
