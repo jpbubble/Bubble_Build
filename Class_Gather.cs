@@ -21,8 +21,9 @@
 // Please note that some references to data like pictures or audio, do not automatically
 // fall under this licenses. Mostly this is noted in the respective files.
 // 
-// Version: 19.04.26
+// Version: 19.04.27
 // EndLic
+
 
 
 
@@ -37,7 +38,7 @@ namespace Bubble {
     static class Gather {
         static public void Hello() {
             MKL.Lic    ("Bubble Builder Tool - Class_Gather.cs","GNU General Public License 3");
-            MKL.Version("Bubble Builder Tool - Class_Gather.cs","19.04.26");
+            MKL.Version("Bubble Builder Tool - Class_Gather.cs","19.04.27");
         }
 
         static public SortedDictionary<string, string> Gathered = new SortedDictionary<string, string>();
@@ -154,6 +155,7 @@ namespace Bubble {
 
     }
 }
+
 
 
 
