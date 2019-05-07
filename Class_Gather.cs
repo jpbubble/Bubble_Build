@@ -57,9 +57,19 @@ namespace Bubble {
             QCol.Doing("Analysing", script);
             try {
                 var usepref = "";
+                var uselocalpref = "";
+                var useglobalpref = "";
                 switch (qstr.ExtractExt(script).ToLower()) {
                     case "lua":
-                        usepref = "-- #USE "; break;
+                        usepref       = "-- #USE "; 
+                        uselocalpref  = "-- #LOCALUSE ";
+                        useglobalpref = "-- #GLOBALUSE ";
+                        break;
+                    case "nil":
+                        usepref       = "#use ";
+                        uselocalpref  = "#localuse ";
+                        useglobalpref = "#globaluse ";
+                        break;
                     default:
                         throw new Exception("Unknown script type!");
                 }
@@ -74,7 +84,7 @@ namespace Bubble {
                             if (!RequestedLibraries.ContainsKey(reqlib)) {
                                 var foundas = "";
                                 foreach (string s in Bubble_Build.Config.List("LibraryPath")) {
-                                    var check = Dirry.AD($"{s}/{reqlib}.blb");
+                                    var check = Dirry.AD($"{s}/{reqlib}.nlb");
                                     //Console.WriteLine($"Checking: {check}");
                                     if (Directory.Exists(check)) {
                                         foundas = check;
