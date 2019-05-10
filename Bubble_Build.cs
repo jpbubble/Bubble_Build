@@ -21,8 +21,9 @@
 // Please note that some references to data like pictures or audio, do not automatically
 // fall under this licenses. Mostly this is noted in the respective files.
 // 
-// Version: 19.04.27
+// Version: 19.05.10
 // EndLic
+
 
 
 
@@ -76,7 +77,7 @@ namespace Bubble {
         #endregion
 
         static void GetAllVersions() {
-            MKL.Version("Bubble Builder Tool - Bubble_Build.cs","19.04.27");
+            MKL.Version("Bubble Builder Tool - Bubble_Build.cs","19.05.10");
             MKL.Lic    ("Bubble Builder Tool - Bubble_Build.cs","GNU General Public License 3");
             Dirry.InitAltDrives(); // Must be done anyway, and we'll get the version in the process!
             GINI.Hello();
@@ -340,6 +341,7 @@ namespace Bubble {
         #endregion
     }
 }
+
 
 
 
