@@ -149,7 +149,7 @@ namespace Bubble {
             }
         }
 
-        static void Ask(TGINI p,string tag, string question, bool alwayscaps=false) {
+        static public void Ask(TGINI p,string tag, string question, bool alwayscaps=false) {
             while (p.C(tag) == "") {
                 QCol.Yellow(question);
                 for (int i = question.Length; i < QCol.DoingTab; i++) Console.Write(" ");
@@ -161,7 +161,7 @@ namespace Bubble {
                 p.D(tag, p.C(tag).ToUpper());
         }
 
-        static void Ask(string tag, string question, bool alwayscaps=false) => Ask(Project, tag, question,alwayscaps);
+        public static void Ask(string tag, string question, bool alwayscaps=false) => Ask(Project, tag, question,alwayscaps);
 
         static void Ask(string caption, string tag, string question, bool alwayscap = false) {
             if (Project.C(tag) == "") {

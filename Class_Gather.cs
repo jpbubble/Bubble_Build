@@ -45,6 +45,7 @@ namespace Bubble {
         static List<string> Working;
         static List<string> Future;
         static SortedDictionary<string, string> RequestedLibraries = new SortedDictionary<string, string>();
+        static Dictionary<string, string> LibTargetDir = new Dictionary<string, string>();
 
         static void Queue(string t,string f,string fromdir, string todir="") {
             var todir2 = todir;
@@ -78,6 +79,13 @@ namespace Bubble {
                     var tl = ln[lnum].Trim();
                     if (qstr.Prefixed(tl, usepref)) {
                         var libname = tl.Substring(usepref.Length);
+                        if (qstr.Prefixed(libname,"'") || qstr.Prefixed(libname,"\"")) {
+                            var q = libname[0];
+                            libname = libname.Substring(1);
+                            var iq = libname.IndexOf(q);
+                            if (iq < 0) throw new Exception($"End of string expected in #use request");
+                            libname = libname.Substring(0, iq);
+                        }
                         if (libname == "") throw new Exception($"Invalid #USE call in line #{lnum+1}");
                         if (qstr.Prefixed(libname.ToUpper(),"LIBS/")) {
                             var reqlib = libname.Substring(5).ToLower();
@@ -94,6 +102,7 @@ namespace Bubble {
                                 if (foundas == "") throw new Exception($"Requested Library ({reqlib}) has not been found in line {lnum+1}");
                                 RequestedLibraries[reqlib] = foundas;
                                 FutLib.Add(foundas);
+                                LibTargetDir[foundas] = $"Libs/{reqlib}.nlb/";
                                 QCol.Doing("- Requested library", foundas);
                             }
                         }
@@ -136,6 +145,7 @@ namespace Bubble {
                             Queue("GINI", fp,dir,todir);
                             break;
                         case "LUA":
+                        case "NIL":
                             AnalyseScript(fp,FUtL,dir,todir);
                             break;
                         default:
@@ -155,9 +165,12 @@ namespace Bubble {
             while(Future.Count>0) {
                 Working = Future;
                 Future = new List<string>();
-                foreach (string d in Working)
-                    GatherDir(Dirry.AD(d), Future,todir);
-                todir = "Libs/";
+                foreach (string d in Working) {
+                    todir = "";
+                    if (LibTargetDir.ContainsKey(d)) todir = LibTargetDir[d];
+                    GatherDir(Dirry.AD(d), Future, todir);
+                }
+                //todir = "Libs/";
             }
         }
 
