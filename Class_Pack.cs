@@ -85,19 +85,48 @@ namespace Bubble {
                 MakeID(jcr);
                 foreach (string tname in Gather.Gathered.Keys) {
                     QCol.Doing(" Adding", tname, "\r");
-                    jcr.AddFile(Gather.Gathered[tname], tname, storage);
-                    var e = jcr.Entries[tname.ToUpper()];
-                    var ratio = (int)(((float)e.CompressedSize / e.Size) * 100);
-                    QCol.Blue(qstr.Right($"   {ratio}% ", 5));
-                    switch (e.Storage) {
-                        case "Store":
-                            QCol.White("\r     Stored:\n"); break;
-                        case "lzma":
-                            QCol.Green("Compressed:\n"); break;
-                        case "zlib":
-                            QCol.Green("  Deflated:\n"); break;
-                        default:
-                            QCol.Magenta($"{storage}:\n"); break;
+                    if (JCR6.Recognize(Gather.Gathered[tname]).ToUpper() != "NONE") {
+                        QCol.Doing("Merging", tname,"\t"); QCol.Cyan($"Recognized as {JCR6.Recognize(Gather.Gathered[tname])}\n");
+                        var j = JCR6.Dir(Gather.Gathered[tname]);
+                        foreach (TJCREntry e in j.Entries.Values) {
+                            QCol.Doing(" Adding", $"{tname}/{e.Entry}", "\r");
+                            if (JCR6.CompDrivers.ContainsKey(e.Storage)) {
+                                var s = j.LoadString(e.Entry);
+                                var targetname = $"{tname}/{e.Entry}";
+                                jcr.AddString(s,targetname, storage);
+                                var te = jcr.Entries[targetname.ToUpper()];
+                                var ratio = (int)(((float)e.CompressedSize / e.Size) * 100);
+                                QCol.Blue(qstr.Right($"   {ratio}% ", 5));
+                                switch (te.Storage) {
+                                    case "Store":
+                                        QCol.White("\r     Stored:\n"); break;
+                                    case "lzma":
+                                        QCol.Green("Compressed:\n"); break;
+                                    case "zlib":
+                                        QCol.Green("Deflated:\n"); break;
+                                    default:
+                                        QCol.Magenta($"{storage}:\n"); break;
+                                }
+                            } else {
+                                QCol.QuickError($"Unknown compression method: {e.Storage}");
+                            }
+                        }
+                        QCol.Red("END OF MERGE!\n");
+                    } else {
+                        jcr.AddFile(Gather.Gathered[tname], tname, storage);
+                        var e = jcr.Entries[tname.ToUpper()];
+                        var ratio = (int)(((float)e.CompressedSize / e.Size) * 100);
+                        QCol.Blue(qstr.Right($"   {ratio}% ", 5));
+                        switch (e.Storage) {
+                            case "Store":
+                                QCol.White("\r     Stored:\n"); break;
+                            case "lzma":
+                                QCol.Green("Compressed:\n"); break;
+                            case "zlib":
+                                QCol.Green("Deflated:\n"); break;
+                            default:
+                                QCol.Magenta($"{storage}:\n"); break;
+                        }
                     }
                 }
             } catch (Exception E) {

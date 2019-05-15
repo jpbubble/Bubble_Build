@@ -1,26 +1,26 @@
 // Lic:
 // Bubble Builder
 // Builds a Bubble Project to a proper test version or a full release
-// 
-// 
-// 
-// (c) Jeroen P. Broks, 
-// 
+//
+//
+//
+// (c) Jeroen P. Broks,
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
+//
 // Please note that some references to data like pictures or audio, do not automatically
 // fall under this licenses. Mostly this is noted in the respective files.
-// 
+//
 // Version: 19.05.10
 // EndLic
 
@@ -73,7 +73,7 @@ namespace Bubble {
                         throw new Exception($"Unknown INFTYPE {Project.C("INFTYPE")}");
                 }
             }
-        } 
+        }
         #endregion
 
         static void GetAllVersions() {
@@ -93,7 +93,7 @@ namespace Bubble {
             JCR6_jxsrcca.Init();
         }
 
-        static void Head() {            
+        static void Head() {
             QCol.Red("Bubble Builder  ");
             QCol.Green($"Version {MKL.Newest}\n");
             QCol.Magenta("Coded by: Jeroen P. Broks\n");
@@ -212,9 +212,42 @@ namespace Bubble {
 
         #region Build Project
         static void MultiScan() {
-
+            Ask("INPUTDIR", "From which directory can I gather the other directories:");
+            Project.CL("INPUTDIRS");
+            Project.CL("IGNOREDIRS");
+            var allow = Project.List("INPUTDIRS");
+            var ignore = Project.List("IGNOREDIRS");
+            var indir = Project.C("INPUTDIR");
+            var indirs = FileList.GetDir(indir, 2, true);
+            var p = Project;
+            foreach (string d in indirs) {
+                var fd = $"{indir}/{d}";
+                if ((!allow.Contains(fd)) && (!ignore.Contains(fd))) {
+                    QCol.Yellow($"I do not know {d}, add it to the project");
+                    QCol.Cyan(" ? ");
+                    QCol.Magenta("<Y/N> ");
+                    var ok = false;
+                    do {
+                        switch (Console.ReadKey(true).Key) {
+                            case ConsoleKey.Y:
+                                QCol.Green("Yes\n");
+                                allow.Add(fd);
+                                p.SaveSource(GINIFiles[p]);
+                                ok = true;
+                                break;
+                            case ConsoleKey.N:
+                                QCol.Red("No\n");
+                                ignore.Add(fd);
+                                p.SaveSource(GINIFiles[p]);
+                                ok = true;
+                                break;
+                        }
+                    } while (!ok);
+                }
+                
+            }
         }
-        
+
         static void BuildProject(string prj) {
             var prjfile = Dirry.AD(prj); if (qstr.ExtractExt(prjfile) == "") prjfile += ".BubbleProject";
             if (Project != null) { Crash("Build Project request, while a build is already running!", "This must be an internal error! Either caused bya bug, or somebody has been messing with the source code!\nEither way, this error is fatal!"); }
@@ -236,7 +269,7 @@ namespace Bubble {
                             return;
                     }
                 } while (!yes);
-                QuickStream.SaveString(prjfile,"[rem]\nI fart in your general direction\nYour mother was a hamster and your father smelt of elderberries.\nNow go away, or I shall taunt you a second time!\n");                
+                QuickStream.SaveString(prjfile,"[rem]\nI fart in your general direction\nYour mother was a hamster and your father smelt of elderberries.\nNow go away, or I shall taunt you a second time!\n");
             } else {
                 QCol.Doing("Reading", prjfile);
             }
@@ -315,7 +348,7 @@ namespace Bubble {
                     if (caps[2] != "BUILDDATA.GINI")
                         Eng.files.Add(name);
                 }
-            }            
+            }
         }
         #endregion
 
@@ -331,7 +364,7 @@ namespace Bubble {
                 InitEngines();
                 ParseCLI();
                 QCol.OriCol();
-                LoadGlobalConfig();                
+                LoadGlobalConfig();
                 foreach (string prj in WantProjects) BuildProject(prj);
             } catch (Exception e) {
                 Crash(e);
@@ -341,12 +374,3 @@ namespace Bubble {
         #endregion
     }
 }
-
-
-
-
-
-
-
-
-
