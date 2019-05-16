@@ -21,8 +21,9 @@
 // Please note that some references to data like pictures or audio, do not automatically
 // fall under this licenses. Mostly this is noted in the respective files.
 // 
-// Version: 19.05.10
+// Version: 19.05.16
 // EndLic
+
 
 
 
@@ -43,7 +44,7 @@ namespace Bubble {
         static TGINI EngineConfig => Bubble_Build.Engine[Bubble_Build.Project.C("Engine").ToUpper()].Config;
 
         static public void Hello() {
-            MKL.Version("Bubble Builder Tool - Class_Pack.cs","19.05.10");
+            MKL.Version("Bubble Builder Tool - Class_Pack.cs","19.05.16");
             MKL.Lic    ("Bubble Builder Tool - Class_Pack.cs","GNU General Public License 3");
         }
 
@@ -142,6 +143,7 @@ namespace Bubble {
         }
     }
 }
+
 
 
 
