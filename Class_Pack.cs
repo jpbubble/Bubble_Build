@@ -91,9 +91,9 @@ namespace Bubble {
                         foreach (TJCREntry e in j.Entries.Values) {
                             QCol.Doing(" Adding", $"{tname}/{e.Entry}", "\r");
                             if (JCR6.CompDrivers.ContainsKey(e.Storage)) {
-                                var s = j.LoadString(e.Entry);
+                                var s = j.JCR_B(e.Entry);
                                 var targetname = $"{tname}/{e.Entry}";
-                                jcr.AddString(s,targetname, storage);
+                                jcr.AddBytes(s,targetname, storage);
                                 var te = jcr.Entries[targetname.ToUpper()];
                                 var ratio = (int)(((float)e.CompressedSize / e.Size) * 100);
                                 QCol.Blue(qstr.Right($"   {ratio}% ", 5));
