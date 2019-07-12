@@ -87,7 +87,7 @@ namespace Bubble {
                     doit = doit || source.LastWriteTime.ToLongDateString() != target.LastWriteTime.ToLongDateString();
                     if (doit) {
                         QCol.Doing("Importing", file);
-                        File.Copy(file, targetfile);
+                        File.Copy(file, targetfile,true);
                     } else
                         QCol.Doing("Kept unmodified", file);
                     jcr.Import(qstr.StripDir(file));
