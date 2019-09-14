@@ -138,8 +138,13 @@ namespace Bubble {
                         case "BMP":
                             Queue("Image",fp,dir,todir);
                             break;
+                        case "TTF":
+                        case "JFBF":
+                            Queue("font", fp, dir, todir);
+                            break;
                         case "OGG":
                         case "MP3":
+                        case "WAV":
                             Queue("Audio", fp,dir,todir);
                             break;
                         case "GINI":

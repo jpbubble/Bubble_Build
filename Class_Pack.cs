@@ -29,6 +29,7 @@
 
 
 using System;
+using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -85,6 +86,8 @@ namespace Bubble {
                     if (!doit) target = new FileInfo(targetfile);
                     doit = doit || source.Length != target.Length;
                     doit = doit || source.LastWriteTime.ToLongDateString() != target.LastWriteTime.ToLongDateString();
+                    source = null;
+                    target = null;
                     if (doit) {
                         QCol.Doing("Importing", file);
                         File.Copy(file, targetfile,true);
@@ -157,6 +160,36 @@ namespace Bubble {
                         }
                     }
                 }
+                    Bubble_Build.Project.CL("ALIAS");
+                foreach (string alias in Bubble_Build.Project.List("ALIAS")) {
+                    if (alias != "") {
+                        var ori = "";
+                        var tar = "";
+                        var sep = false;
+                        var skip = 0;
+                        for (int ai = 0; ai < alias.Length; ai++) {
+                            if (ai < alias.Length - 4 && qstr.Mid(alias, ai + 1, 4) == " => ") {
+                                sep = true;
+                                skip = 3;
+                            } else if (skip > 0)
+                                skip--;
+                            else if (!sep)
+                                ori += alias[ai];
+                            else
+                                tar += alias[ai];
+                        }
+                        if (!sep)
+                            QCol.QuickError($"Misformed alias request: {alias}");
+                        else {
+                            QCol.Yellow("Alias: ");
+                            QCol.Red(ori);
+                            QCol.White(" => ");
+                            QCol.Green($"{tar}\n");
+                            jcr.Alias(ori, tar);
+                            if (JCR6.JERROR != "") QCol.QuickError($"Alias failed!\n{JCR6.JERROR}");
+                        }
+                    }
+                }
             } catch (Exception E) {
                 QCol.QuickError($"PACK ERROR: {E.Message}");
                 QCol.Cyan($"{E.StackTrace}\n\n");
@@ -166,6 +199,7 @@ namespace Bubble {
                     QCol.Doing("Finalizing","");
                     jcr.Close();
                 }
+                Thread.Sleep(2500);
             }
         }
     }
